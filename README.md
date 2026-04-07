@@ -26,31 +26,35 @@ The pipeline turns that idea into a dataset that the rest of the team can use fo
 
 ## What Was Run
 
-On **April 6, 2026** the full pipeline was run with a public Ethereum RPC endpoint and the default configuration in [`config/markets.yaml`](config/markets.yaml).
+On **April 7, 2026** the dataset was rebuilt with the 30-day configuration in [`config/markets.yaml`](config/markets.yaml).
 
-The resulting time window is:
+The resulting analysis window is:
 
-- start: `2025-12-07 09:17:00+00:00`
-- end: `2026-04-06 08:36:00+00:00`
+- start: `2026-03-08 01:35:47+00:00`
+- end: `2026-04-07 01:35:47+00:00`
+
+The raw files keep `2` warm-start `Sync` rows from just before the start time so the first 30-day pool-state rows have the correct prior reserves.
 
 ## Generated Outputs
 
 ### Raw data
 
-- `data/raw/event_logs.parquet`: `68,702` rows
-- `data/raw/block_headers.parquet`: `21,148` rows
+- `data/raw/event_logs.parquet`: `12,974` rows
+- `data/raw/block_headers.parquet`: `4,297` rows
 - `data/raw/pair_metadata.parquet`
 - `data/raw/source_manifest.yaml`
 
 ### Curated data
 
-- `data/curated/events_curated.parquet`: `68,702` rows
-- `data/curated/swaps_raw.parquet`: `29,428` rows
-- `data/curated/pool_state_1m.parquet`: `345,130` rows
-- `data/curated/arb_labels_1m.parquet`: `172,370` rows
-- `data/curated/split_assignments.parquet`: `172,370` rows
+- `data/curated/events_curated.parquet`: `12,972` rows
+- `data/curated/swaps_raw.parquet`: `5,831` rows
+- `data/curated/pool_state_1m.parquet`: `86,377` rows
+- `data/curated/arb_labels_1m.parquet`: `43,184` rows
+- `data/curated/split_assignments.parquet`: `43,184` rows
 - `data/curated/split_manifest.yaml`
 - `data/curated/qc_report.json`
+
+Each raw and curated table is also written as a full `.csv` file plus a smaller `_preview.csv` file for easier inspection in an IDE.
 
 ### Report outputs
 
@@ -68,15 +72,15 @@ The resulting time window is:
 From the generated dataset:
 
 - DEX venues covered: `uniswap_v2`, `sushiswap_v2`
-- arbitrage label rows: `172,370`
-- net-positive opportunity flags: `4`
-- mean net edge: `-100.0464 bps`
+- arbitrage label rows: `43,184`
+- net-positive opportunity flags: `1`
+- mean net edge: `-138.9566 bps`
 
 Chronological split counts:
 
-- train: `120,658`
-- validation: `25,856`
-- test: `25,856`
+- train: `30,228`
+- validation: `6,478`
+- test: `6,478`
 
 This is a useful result, not a bad one. It shows that once fees and gas are included, most apparent price differences do **not** survive as profitable trades. That is exactly the kind of economically meaningful finding the assignment expects.
 

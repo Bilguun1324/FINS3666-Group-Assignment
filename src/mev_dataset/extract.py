@@ -77,9 +77,20 @@ def resolve_block_window(
     start_block: int | None = None,
     end_block: int | None = None,
 ) -> tuple[int, int, datetime, datetime]:
-    start_time, end_time = config.resolve_window()
-    resolved_start_block = start_block or rpc.find_block_by_timestamp(start_time, direction="after")
-    resolved_end_block = end_block or rpc.find_block_by_timestamp(end_time, direction="before")
+    requested_start_time, requested_end_time = config.resolve_window()
+    if start_block is None:
+        resolved_start_block = rpc.find_block_by_timestamp(requested_start_time, direction="after")
+        start_time = requested_start_time
+    else:
+        resolved_start_block = start_block
+        start_time = rpc.block_timestamp(resolved_start_block)
+
+    if end_block is None:
+        resolved_end_block = rpc.find_block_by_timestamp(requested_end_time, direction="before")
+        end_time = requested_end_time
+    else:
+        resolved_end_block = end_block
+        end_time = rpc.block_timestamp(resolved_end_block)
     return resolved_start_block, resolved_end_block, start_time, end_time
 
 

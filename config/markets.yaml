@@ -1,6 +1,6 @@
 market: wbtc_weth_mainnet
 chain_id: 1
-sample_window_days: 120
+sample_window_days: 30
 start_date:
 end_date:
 block_chunk_size: 4000
