@@ -1,6 +1,6 @@
 market: wbtc_weth_mainnet
 chain_id: 1
-sample_window_days: 120
+sample_window_days: 30
 start_date:
 end_date:
 block_chunk_size: 4000
@@ -30,17 +30,17 @@ gas:
 tokens:
   wbtc:
     symbol: WBTC
-    address: 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
+    address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
     decimals: 8
   weth:
     symbol: WETH
-    address: 0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2
+    address: "0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2"
     decimals: 18
 
 dexes:
   - name: uniswap_v2
-    factory_address: 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f
+    factory_address: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
     fee_bps: 30
   - name: sushiswap_v2
-    factory_address: 0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac
+    factory_address: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"
     fee_bps: 30

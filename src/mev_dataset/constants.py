@@ -19,7 +19,7 @@ def selector(signature: str) -> str:
 
 
 def topic(signature: str) -> str:
-    return Web3.keccak(text=signature).hex()
+    return Web3.to_hex(Web3.keccak(text=signature))
 
 
 GET_PAIR_SELECTOR = selector(GET_PAIR_SIGNATURE)

@@ -30,9 +30,45 @@ RAW_LOG_COLUMNS = [
     "removed",
 ]
 
+PREVIEW_ROW_LIMIT = 5000
+RAW_PREVIEW_COLUMNS = {
+    "event_logs": [
+        "dex",
+        "pair_address",
+        "block_number",
+        "transaction_hash",
+        "log_index",
+        "event_name",
+        "topic0",
+        "removed",
+    ],
+    "block_headers": [
+        "block_number",
+        "block_timestamp",
+        "base_fee_per_gas_wei",
+        "gas_used",
+        "gas_limit",
+    ],
+    "pair_metadata": [
+        "dex",
+        "factory_address",
+        "pair_address",
+        "token0",
+        "token1",
+        "wbtc_is_token0",
+        "fee_rate",
+    ],
+}
+
 
 def _empty_raw_logs() -> pd.DataFrame:
     return pd.DataFrame(columns=RAW_LOG_COLUMNS)
+
+
+def _preview_frame(df: pd.DataFrame, preferred_columns: list[str], max_rows: int = PREVIEW_ROW_LIMIT) -> pd.DataFrame:
+    columns = [column for column in preferred_columns if column in df.columns]
+    preview = df[columns].head(max_rows) if columns else df.head(max_rows)
+    return preview
 
 
 def resolve_block_window(
@@ -41,9 +77,20 @@ def resolve_block_window(
     start_block: int | None = None,
     end_block: int | None = None,
 ) -> tuple[int, int, datetime, datetime]:
-    start_time, end_time = config.resolve_window()
-    resolved_start_block = start_block or rpc.find_block_by_timestamp(start_time, direction="after")
-    resolved_end_block = end_block or rpc.find_block_by_timestamp(end_time, direction="before")
+    requested_start_time, requested_end_time = config.resolve_window()
+    if start_block is None:
+        resolved_start_block = rpc.find_block_by_timestamp(requested_start_time, direction="after")
+        start_time = requested_start_time
+    else:
+        resolved_start_block = start_block
+        start_time = rpc.block_timestamp(resolved_start_block)
+
+    if end_block is None:
+        resolved_end_block = rpc.find_block_by_timestamp(requested_end_time, direction="before")
+        end_time = requested_end_time
+    else:
+        resolved_end_block = end_block
+        end_time = rpc.block_timestamp(resolved_end_block)
     return resolved_start_block, resolved_end_block, start_time, end_time
 
 
@@ -86,7 +133,7 @@ def collect_pair_logs(
 
 
 def fetch_block_headers(rpc: RpcClient, block_numbers: list[int]) -> pd.DataFrame:
-    headers = [rpc.get_block_by_number(block_number, use_cache=True) for block_number in sorted(set(block_numbers))]
+    headers = rpc.get_blocks_by_number(sorted(set(block_numbers)), use_cache=True, batch_size=100)
     return pd.DataFrame(
         {
             "block_number": [header.block_number for header in headers],
@@ -158,6 +205,12 @@ def write_raw_outputs(
     raw_dir = Path(config.raw_data_dir)
     raw_dir.mkdir(parents=True, exist_ok=True)
     logs_df.to_parquet(raw_dir / "event_logs.parquet", index=False)
+    logs_df.to_csv(raw_dir / "event_logs.csv", index=False)
+    _preview_frame(logs_df, RAW_PREVIEW_COLUMNS["event_logs"]).to_csv(raw_dir / "event_logs_preview.csv", index=False)
     blocks_df.to_parquet(raw_dir / "block_headers.parquet", index=False)
+    blocks_df.to_csv(raw_dir / "block_headers.csv", index=False)
+    _preview_frame(blocks_df, RAW_PREVIEW_COLUMNS["block_headers"]).to_csv(raw_dir / "block_headers_preview.csv", index=False)
     pair_frame.to_parquet(raw_dir / "pair_metadata.parquet", index=False)
+    pair_frame.to_csv(raw_dir / "pair_metadata.csv", index=False)
+    _preview_frame(pair_frame, RAW_PREVIEW_COLUMNS["pair_metadata"]).to_csv(raw_dir / "pair_metadata_preview.csv", index=False)
     (raw_dir / "source_manifest.yaml").write_text(yaml.safe_dump(manifest, sort_keys=False))

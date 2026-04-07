@@ -1,0 +1,28 @@
+dataset,column,description
+swaps_raw,timestamp,UTC timestamp of the block containing the swap event
+swaps_raw,block_number,Ethereum block number
+swaps_raw,dex,Source DEX venue
+swaps_raw,pair_address,Pool smart contract address
+swaps_raw,transaction_hash,Transaction hash for the event
+swaps_raw,log_index,Log index within the block
+swaps_raw,amount_wbtc,Signed WBTC reserve delta from the pool perspective
+swaps_raw,amount_weth,Signed WETH reserve delta from the pool perspective
+swaps_raw,reserve_wbtc_post,Post-event WBTC reserves in the pool
+swaps_raw,reserve_weth_post,Post-event WETH reserves in the pool
+pool_state_1m,timestamp,1-minute UTC bar timestamp
+pool_state_1m,dex,DEX venue for the state row
+pool_state_1m,mid_price_eth_per_btc,Implied pool mid price in ETH per BTC
+pool_state_1m,reserve_wbtc,Forward-filled WBTC reserves for the minute
+pool_state_1m,reserve_weth,Forward-filled WETH reserves for the minute
+pool_state_1m,swap_count,Number of swaps observed in the minute
+pool_state_1m,volume_wbtc,Absolute WBTC volume observed in the minute
+pool_state_1m,volume_weth,Absolute WETH volume observed in the minute
+pool_state_1m,stale_state,True when the last Sync event is older than the configured threshold
+arb_labels_1m,timestamp,1-minute UTC timestamp for the arbitrage label
+arb_labels_1m,buy_dex,Venue used to buy WBTC
+arb_labels_1m,sell_dex,Venue used to sell WBTC
+arb_labels_1m,gross_edge_bps,"Pre-fee, pre-gas executable arbitrage edge in basis points"
+arb_labels_1m,fee_cost_bps,Estimated venue fees in basis points
+arb_labels_1m,gas_cost_weth,Estimated gas cost in WETH
+arb_labels_1m,net_edge_bps,"Post-fee, post-gas arbitrage edge in basis points"
+arb_labels_1m,opportunity_flag,True when the best direction remains net positive and non-stale
