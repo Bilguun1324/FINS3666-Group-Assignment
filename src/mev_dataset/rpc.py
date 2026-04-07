@@ -55,6 +55,15 @@ class RpcClient:
         digest = hashlib.sha256(payload).hexdigest()
         return self.cache_dir / f"{digest}.json"
 
+    def _post_json(self, payload: Any) -> Any:
+        response = self.session.post(
+            self.rpc_url,
+            json=payload,
+            timeout=self.timeout_seconds,
+        )
+        response.raise_for_status()
+        return response.json()
+
     def call(self, method: str, params: list[Any], use_cache: bool = False) -> Any:
         cache_path = self._cache_path(method, params)
         if use_cache and cache_path.exists():
@@ -63,13 +72,7 @@ class RpcClient:
         last_error: Exception | None = None
         for attempt in range(1, self.max_retries + 1):
             try:
-                response = self.session.post(
-                    self.rpc_url,
-                    json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
-                    timeout=self.timeout_seconds,
-                )
-                response.raise_for_status()
-                payload = response.json()
+                payload = self._post_json({"jsonrpc": "2.0", "id": 1, "method": method, "params": params})
                 if "error" in payload:
                     raise JsonRpcError(f"{method} failed: {payload['error']}")
                 result = payload["result"]
@@ -82,6 +85,49 @@ class RpcClient:
                     break
                 time.sleep(self.retry_backoff_seconds * attempt)
         raise JsonRpcError(f"{method} failed after {self.max_retries} attempts: {last_error}")
+
+    def batch_call(self, calls: list[tuple[str, list[Any]]], use_cache: bool = False) -> list[Any]:
+        results: list[Any] = [None] * len(calls)
+        pending: list[tuple[int, str, list[Any], Path]] = []
+
+        for index, (method, params) in enumerate(calls):
+            cache_path = self._cache_path(method, params)
+            if use_cache and cache_path.exists():
+                results[index] = json.loads(cache_path.read_text())["result"]
+            else:
+                pending.append((index, method, params, cache_path))
+
+        if not pending:
+            return results
+
+        last_error: Exception | None = None
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                payload = [
+                    {"jsonrpc": "2.0", "id": index, "method": method, "params": params}
+                    for index, method, params, _ in pending
+                ]
+                response_items = self._post_json(payload)
+                if not isinstance(response_items, list):
+                    raise JsonRpcError(f"batch call returned non-list response: {response_items}")
+                response_by_id = {item["id"]: item for item in response_items}
+                for index, method, params, cache_path in pending:
+                    item = response_by_id.get(index)
+                    if item is None:
+                        raise JsonRpcError(f"batch call missing response for id={index}")
+                    if "error" in item:
+                        raise JsonRpcError(f"{method} failed: {item['error']}")
+                    result = item["result"]
+                    results[index] = result
+                    if use_cache:
+                        cache_path.write_text(json.dumps({"result": result}))
+                return results
+            except Exception as exc:  # pragma: no cover - retry path is timing dependent
+                last_error = exc
+                if attempt == self.max_retries:
+                    break
+                time.sleep(self.retry_backoff_seconds * attempt)
+        raise JsonRpcError(f"batch call failed after {self.max_retries} attempts: {last_error}")
 
     def get_latest_block_number(self) -> int:
         return int(self.call("eth_blockNumber", [], use_cache=False), 16)
@@ -106,12 +152,8 @@ class RpcClient:
             params[0]["topics"] = topics
         return self.call("eth_getLogs", params, use_cache=use_cache)
 
-    def get_block_by_number(self, block_number: int, use_cache: bool = True) -> BlockHeader:
-        raw = self.call(
-            "eth_getBlockByNumber",
-            [self.to_hex_quantity(block_number), False],
-            use_cache=use_cache,
-        )
+    @staticmethod
+    def _parse_block_header(raw: dict[str, Any]) -> BlockHeader:
         return BlockHeader(
             block_number=int(raw["number"], 16),
             block_hash=raw["hash"],
@@ -121,6 +163,29 @@ class RpcClient:
             gas_used=int(raw["gasUsed"], 16),
             gas_limit=int(raw["gasLimit"], 16),
         )
+
+    def get_block_by_number(self, block_number: int, use_cache: bool = True) -> BlockHeader:
+        raw = self.call(
+            "eth_getBlockByNumber",
+            [self.to_hex_quantity(block_number), False],
+            use_cache=use_cache,
+        )
+        return self._parse_block_header(raw)
+
+    def get_blocks_by_number(
+        self,
+        block_numbers: list[int],
+        use_cache: bool = True,
+        batch_size: int = 100,
+    ) -> list[BlockHeader]:
+        unique_blocks = sorted(set(block_numbers))
+        headers: list[BlockHeader] = []
+        for start in range(0, len(unique_blocks), batch_size):
+            chunk = unique_blocks[start : start + batch_size]
+            calls = [("eth_getBlockByNumber", [self.to_hex_quantity(block_number), False]) for block_number in chunk]
+            raw_headers = self.batch_call(calls, use_cache=use_cache)
+            headers.extend(self._parse_block_header(raw_header) for raw_header in raw_headers)
+        return headers
 
     def block_timestamp(self, block_number: int) -> datetime:
         return self.get_block_by_number(block_number, use_cache=True).block_timestamp

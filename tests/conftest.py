@@ -67,6 +67,9 @@ class FakeRpc:
     def get_block_by_number(self, block_number: int, use_cache: bool = True) -> BlockHeader:
         return self.block_headers[block_number]
 
+    def get_blocks_by_number(self, block_numbers: list[int], use_cache: bool = True, batch_size: int = 100) -> list[BlockHeader]:
+        return [self.block_headers[block_number] for block_number in sorted(set(block_numbers))]
+
     def get_latest_block_number(self) -> int:
         return max(self.block_headers)
 

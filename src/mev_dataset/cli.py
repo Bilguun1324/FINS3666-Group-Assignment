@@ -21,6 +21,64 @@ from mev_dataset.split import assign_splits, build_split_assignments, write_spli
 
 app = typer.Typer(add_completion=False, no_args_is_help=True)
 
+PREVIEW_ROW_LIMIT = 5000
+CURATED_PREVIEW_COLUMNS = {
+    "events_curated": [
+        "timestamp",
+        "dex",
+        "pair_address",
+        "block_number",
+        "transaction_hash",
+        "log_index",
+        "event_name",
+        "reserve_wbtc_post",
+        "reserve_weth_post",
+        "mid_price_eth_per_btc",
+    ],
+    "swaps_raw": [
+        "timestamp",
+        "dex",
+        "block_number",
+        "transaction_hash",
+        "log_index",
+        "amount_wbtc",
+        "amount_weth",
+        "volume_wbtc",
+        "volume_weth",
+        "mid_price_eth_per_btc",
+        "trade_direction",
+    ],
+    "pool_state_1m": [
+        "timestamp",
+        "dex",
+        "pair_address",
+        "mid_price_eth_per_btc",
+        "reserve_wbtc",
+        "reserve_weth",
+        "swap_count",
+        "volume_wbtc",
+        "volume_weth",
+        "stale_state",
+        "split",
+    ],
+    "arb_labels_1m": [
+        "timestamp",
+        "buy_dex",
+        "sell_dex",
+        "gross_edge_bps",
+        "fee_cost_bps",
+        "gas_cost_weth",
+        "net_edge_bps",
+        "opportunity_flag",
+        "stale_state",
+        "split",
+    ],
+    "split_assignments": [
+        "timestamp",
+        "split",
+    ],
+}
+
 
 DATASET_DICTIONARY = [
     ("swaps_raw", "timestamp", "UTC timestamp of the block containing the swap event"),
@@ -83,6 +141,35 @@ def _write_dataset_dictionary(config: MarketConfig) -> None:
     pd.DataFrame(rows).to_csv(Path(config.metadata_dir) / "dataset_dictionary.csv", index=False)
 
 
+def _sanitize_events_for_parquet(events_df: pd.DataFrame) -> pd.DataFrame:
+    out = events_df.copy()
+    raw_columns = [column for column in out.columns if column.endswith("_raw")]
+    for column in raw_columns:
+        out[column] = out[column].map(lambda value: None if pd.isna(value) else str(int(value)))
+    return out
+
+
+def _preview_frame(df: pd.DataFrame, preferred_columns: list[str], max_rows: int = PREVIEW_ROW_LIMIT) -> pd.DataFrame:
+    columns = [column for column in preferred_columns if column in df.columns]
+    preview = df[columns].head(max_rows) if columns else df.head(max_rows)
+    return preview
+
+
+def _write_curated_table(
+    curated_dir: Path,
+    stem: str,
+    parquet_df: pd.DataFrame,
+    csv_df: pd.DataFrame | None = None,
+) -> None:
+    export_df = csv_df if csv_df is not None else parquet_df
+    parquet_df.to_parquet(curated_dir / f"{stem}.parquet", index=False)
+    export_df.to_csv(curated_dir / f"{stem}.csv", index=False)
+    _preview_frame(export_df, CURATED_PREVIEW_COLUMNS.get(stem, [])).to_csv(
+        curated_dir / f"{stem}_preview.csv",
+        index=False,
+    )
+
+
 def _collect_chain_data(
     config: MarketConfig,
     rpc_url: str | None,
@@ -108,11 +195,12 @@ def _build_curated_dataset(config: MarketConfig) -> None:
     events_df = normalize_event_logs(logs_df, blocks_df, pair_df, config)
     swaps_df = build_swaps_raw(events_df, config)
     pool_state_df = build_pool_state_1m(events_df, swaps_df, stale_after_minutes=config.stale_after_minutes)
+    events_to_write = _sanitize_events_for_parquet(events_df)
     curated_dir = Path(config.curated_data_dir)
     curated_dir.mkdir(parents=True, exist_ok=True)
-    events_df.to_parquet(curated_dir / "events_curated.parquet", index=False)
-    swaps_df.to_parquet(curated_dir / "swaps_raw.parquet", index=False)
-    pool_state_df.to_parquet(curated_dir / "pool_state_1m.parquet", index=False)
+    _write_curated_table(curated_dir, "events_curated", events_to_write)
+    _write_curated_table(curated_dir, "swaps_raw", swaps_df)
+    _write_curated_table(curated_dir, "pool_state_1m", pool_state_df)
     _write_dataset_dictionary(config)
 
 
@@ -132,9 +220,14 @@ def _build_arb_labels(config: MarketConfig) -> None:
     assignments, boundaries = build_split_assignments(reference_timestamps, config.splits)
     pool_state_with_split = pool_state_df.merge(assignments, on="timestamp", how="left")
     arb_with_split = assign_splits(arb_df, boundaries) if not arb_df.empty else arb_df
-    pool_state_with_split.to_parquet(curated_dir / "pool_state_1m.parquet", index=False)
-    arb_with_split.to_parquet(curated_dir / "arb_labels_1m.parquet", index=False)
+    _write_curated_table(curated_dir, "pool_state_1m", pool_state_with_split)
+    _write_curated_table(curated_dir, "arb_labels_1m", arb_with_split)
     write_split_manifest(curated_dir, assignments, boundaries)
+    assignments.to_csv(curated_dir / "split_assignments.csv", index=False)
+    _preview_frame(assignments, CURATED_PREVIEW_COLUMNS["split_assignments"]).to_csv(
+        curated_dir / "split_assignments_preview.csv",
+        index=False,
+    )
     report = run_qc(swaps_raw=swaps_df, pool_state_1m=pool_state_with_split, arb_labels_1m=arb_with_split)
     write_qc_report(curated_dir, report)
 
