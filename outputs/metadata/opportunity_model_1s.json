@@ -1,0 +1,21 @@
+{
+  "model_type": "linear_opportunity_edge_model",
+  "target": "net_edge_bps",
+  "dexes": [
+    "sushiswap_v2",
+    "uniswap_v2"
+  ],
+  "feature_columns": [
+    "abs_spread_bps",
+    "abs_spread_sq",
+    "base_fee_gwei"
+  ],
+  "intercept": -140.27284123166535,
+  "coefficients": {
+    "abs_spread_bps": 0.9924096626486956,
+    "abs_spread_sq": 2.1590468555107862e-05,
+    "base_fee_gwei": -0.6314542694865474
+  },
+  "train_rows": 1793963,
+  "notes": "This model ranks candidate MEV minutes by predicted post-fee, post-gas edge. It is intentionally a regression model because the current dataset snapshot has an extremely sparse binary opportunity flag."
+}
