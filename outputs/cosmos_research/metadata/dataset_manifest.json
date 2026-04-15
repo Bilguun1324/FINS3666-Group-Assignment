@@ -1,0 +1,17 @@
+{
+  "aggregate": 1,
+  "api_base": "https://api.geckoterminal.com/api/v2",
+  "created_at_utc": "2026-04-15T07:42:12.537661+00:00",
+  "limit": 720,
+  "market_edge_rows": 720,
+  "market_slug": "cosmos_research",
+  "network": "kava",
+  "pool_ohlcv_rows": 2160,
+  "rebuilt_at_utc": "2026-04-15T07:48:30.921161+00:00",
+  "rebuilt_with_min_pool_ohlcv_rows": 24,
+  "search_query": "ATOM USD",
+  "selected_pool_count": 3,
+  "source": "GeckoTerminal Public API",
+  "target_asset": "ATOM",
+  "timeframe": "hour"
+}
