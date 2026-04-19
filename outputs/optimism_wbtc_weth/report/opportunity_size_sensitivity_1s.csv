@@ -1,0 +1,8 @@
+trade_size_base,observed_seconds,gross_positive_seconds,net_positive_seconds,max_net_profit_quote,mean_net_profit_quote,max_net_edge_bps,mean_net_edge_bps
+0.0005,0,0,0,,,,
+0.001,0,0,0,,,,
+0.0025,0,0,0,,,,
+0.005,0,0,0,,,,
+0.01,0,0,0,,,,
+0.025,0,0,0,,,,
+0.05,0,0,0,,,,

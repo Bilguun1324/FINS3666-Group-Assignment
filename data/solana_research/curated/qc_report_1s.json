@@ -1,0 +1,7 @@
+{
+  "duplicate_events": 0,
+  "non_positive_reserves": 0,
+  "pool_state_nulls": 0,
+  "arb_label_nulls": 0,
+  "passed": true
+}

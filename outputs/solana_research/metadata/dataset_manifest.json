@@ -1,17 +1,263 @@
 {
-  "aggregate": 1,
-  "api_base": "https://api.geckoterminal.com/api/v2",
-  "created_at_utc": "2026-04-15T07:40:27.319477+00:00",
-  "limit": 720,
-  "market_edge_rows": 720,
+  "status": "supported_with_limitations",
   "market_slug": "solana_research",
-  "network": "solana",
-  "pool_ohlcv_rows": 2160,
-  "rebuilt_at_utc": "2026-04-15T07:48:30.816216+00:00",
-  "rebuilt_with_min_pool_ohlcv_rows": 24,
-  "search_query": "SOL USDC",
-  "selected_pool_count": 3,
-  "source": "GeckoTerminal Public API",
-  "target_asset": "SOL",
-  "timeframe": "hour"
+  "chain_name": "Solana",
+  "pair_label": "SOL/USDC",
+  "base_token": {
+    "symbol": "SOL",
+    "address": "So11111111111111111111111111111111111111112",
+    "decimals": 9
+  },
+  "quote_token": {
+    "symbol": "USDC",
+    "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "decimals": 6
+  },
+  "sample_window_days": 7,
+  "state_frequency": "1s",
+  "window_start_utc": "2026-04-12T06:31:51+00:00",
+  "window_end_utc": "2026-04-19T06:31:51+00:00",
+  "selected_pools": [
+    {
+      "dex": "raydium_cpmm",
+      "source": "raydium_v3_api",
+      "pool_address": "47hq28mcL7q5GhBg7epyGF2dnuJd4MKFt8QhT7CzYUp4",
+      "pool_name": "Raydium Standard SOL/USDC",
+      "pool_family": "raydium",
+      "pool_type": "Cpmm",
+      "base_token": {
+        "symbol": "SOL",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9
+      },
+      "quote_token": {
+        "symbol": "USDC",
+        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "decimals": 6
+      },
+      "vault_base": "9tAoQUNB1wKnBSUyc6ukg2pWbeofZJVHxur2UaRBZNZc",
+      "vault_quote": "BArWLNarRzS7N1GCwBjNgVnC4866c8oJNRqhb5axf6y4",
+      "tvl_usd": 132.2,
+      "volume_24h_usd": 817.3377779602431,
+      "fee_rate_floor": 0.003,
+      "fee_model": "exact_fixed_fee",
+      "reconstructable": true,
+      "reconstructable_reason": "Raydium CPMM exposes direct pool vaults and fixed trade fee metadata.",
+      "metadata": {
+        "pooltype": [
+          "Cpmm"
+        ],
+        "programId": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+        "detail": {
+          "programId": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+          "id": "47hq28mcL7q5GhBg7epyGF2dnuJd4MKFt8QhT7CzYUp4",
+          "mintA": {
+            "chainId": 101,
+            "address": "So11111111111111111111111111111111111111112",
+            "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "logoURI": "https://img-v1.raydium.io/icon/So11111111111111111111111111111111111111112.png",
+            "symbol": "WSOL",
+            "name": "Wrapped SOL",
+            "decimals": 9,
+            "tags": [],
+            "extensions": {}
+          },
+          "mintB": {
+            "chainId": 101,
+            "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "logoURI": "https://img-v1.raydium.io/icon/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v.png",
+            "symbol": "USDC",
+            "name": "USD Coin",
+            "decimals": 6,
+            "tags": [
+              "hasFreeze"
+            ],
+            "extensions": {}
+          },
+          "lookupTableAccount": "AgUMnD2hCxP29NMKx5Y2vy42QFgj8vZhGSFRUu4FaZYm",
+          "openTime": "1749098776",
+          "vault": {
+            "A": "9tAoQUNB1wKnBSUyc6ukg2pWbeofZJVHxur2UaRBZNZc",
+            "B": "BArWLNarRzS7N1GCwBjNgVnC4866c8oJNRqhb5axf6y4"
+          },
+          "authority": "GpMZbSM2GgvTKHJirzeGfMFoaZ8UR2X7F4v8vHTvxFbL",
+          "config": {
+            "id": "BgxH5ifebqHDuiADWKhLjXGP5hWZeZLoCdmeWJLkRqLP",
+            "index": 5,
+            "protocolFeeRate": 120000,
+            "tradeFeeRate": 3000,
+            "fundFeeRate": 40000,
+            "createPoolFee": "150000000",
+            "creatorFeeRate": 500,
+            "showWeb": true
+          },
+          "mintLp": {
+            "chainId": 101,
+            "address": "7QwB6ESUMKRLZzJWcCsAvjn26Frorhb6sg9HV8xcKKuG",
+            "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "logoURI": "",
+            "symbol": "",
+            "name": "",
+            "decimals": 9,
+            "tags": [],
+            "extensions": {}
+          },
+          "observationId": "AwXcFysn5vntDyiGo9hXDhTMFSg2in7hxj8ED51oZgqo"
+        }
+      }
+    },
+    {
+      "dex": "meteora_damm_v2",
+      "source": "meteora_damm_v2_api",
+      "pool_address": "Ft8FD9gg1TdawhWijNzdkpYTiVL8ETfY6gAwS24bwYio",
+      "pool_name": "SOL-USDC",
+      "pool_family": "meteora_damm_v2",
+      "pool_type": "full_range",
+      "base_token": {
+        "symbol": "SOL",
+        "address": "So11111111111111111111111111111111111111112",
+        "decimals": 9
+      },
+      "quote_token": {
+        "symbol": "USDC",
+        "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "decimals": 6
+      },
+      "vault_base": "3PrjfyMG7eSkdMgGfyHkzZCwUeyiS33PL3BZw6YbCyMw",
+      "vault_quote": "5WGizqYRSs3viSANuZpv6dRMtTUmCmWqGVxvNApsHZoq",
+      "tvl_usd": 3270.369387410752,
+      "volume_24h_usd": 378.8973449762067,
+      "fee_rate_floor": 0.0025,
+      "fee_model": "lower_bound_base_fee",
+      "reconstructable": true,
+      "reconstructable_reason": "Meteora DAMM v2 exposes direct pool vaults and uses a constant-product full-range pool.",
+      "metadata": {
+        "address": "Ft8FD9gg1TdawhWijNzdkpYTiVL8ETfY6gAwS24bwYio",
+        "name": "SOL-USDC",
+        "token_x": {
+          "address": "So11111111111111111111111111111111111111112",
+          "name": "Wrapped SOL",
+          "symbol": "SOL",
+          "decimals": 9,
+          "is_verified": true,
+          "holders": 3820662,
+          "freeze_authority_disabled": true,
+          "total_supply": 624650473.7082658,
+          "price": 86.09746608591271,
+          "market_cap": 49535307263.69908
+        },
+        "token_y": {
+          "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "decimals": 6,
+          "is_verified": true,
+          "holders": 5248202,
+          "freeze_authority_disabled": false,
+          "total_supply": 9114933534.463266,
+          "price": 0.9998375180738768,
+          "market_cap": 9113452522.5061
+        },
+        "token_x_amount": 19.109238462999997,
+        "token_y_amount": 1635.258329,
+        "created_at": 1746009554000,
+        "vault_x": "3PrjfyMG7eSkdMgGfyHkzZCwUeyiS33PL3BZw6YbCyMw",
+        "vault_y": "5WGizqYRSs3viSANuZpv6dRMtTUmCmWqGVxvNApsHZoq",
+        "alpha_vault": "11111111111111111111111111111111",
+        "pool_config": {
+          "collect_fee_mode": 1,
+          "base_fee_mode": 0,
+          "base_fee_pct": 0.25,
+          "protocol_fee_pct": 20,
+          "partner_fee_pct": 0,
+          "referral_fee_pct": 20,
+          "dynamic_fee_initialized": true,
+          "compounding_fee_pct": 0.2,
+          "pool_type": 0,
+          "concentrated_liquidity": false,
+          "min_price": 5.421214630269582e-17,
+          "max_price": 1.844605071373595e+22,
+          "activation_type": 1,
+          "activation_point": 1746009554
+        },
+        "tvl": 3270.369387410752,
+        "current_price": 85.34851021384094,
+        "has_farm": false,
+        "farm_apr": 0.0,
+        "farm_apy": 0.0,
+        "permanent_lock_liquidity": 1149.4388846583392,
+        "vested_liquidity": {
+          "months_3": 0.0,
+          "months_6": 0.0
+        },
+        "volume": {
+          "30m": 68.05882529447321,
+          "1h": 76.70965462933188,
+          "2h": 118.63490142462987,
+          "4h": 203.2574612433972,
+          "12h": 278.6109203904073,
+          "24h": 378.8973449762067
+        },
+        "fees": {
+          "30m": 0.14703744996055942,
+          "1h": 0.16533201397986597,
+          "2h": 0.25564387200573035,
+          "4h": 0.4351956552884484,
+          "12h": 0.5932461229088853,
+          "24h": 0.8045500677282156
+        },
+        "protocol_fees": {
+          "30m": 0.03299046857952426,
+          "1h": 0.037067700993051705,
+          "2h": 0.05533024861103654,
+          "4h": 0.096704839961249,
+          "12h": 0.1291685755274454,
+          "24h": 0.17675555799558726
+        },
+        "fee_tvl_ratio": {
+          "30m": 0.004496050217647533,
+          "1h": 0.005055453815593723,
+          "2h": 0.00781697238819041,
+          "4h": 0.013307232417344928,
+          "12h": 0.018140034125581628,
+          "24h": 0.02460119859320239
+        },
+        "cumulative_metrics": {
+          "volume": 2897871.629615035,
+          "fees": 6017.90696020965
+        },
+        "is_blacklisted": false,
+        "launchpad": "",
+        "tags": []
+      }
+    }
+  ],
+  "network_fee_bounds": {
+    "network_fee_lamports_floor": 5000,
+    "network_fee_lamports_p95": 106492
+  },
+  "venue_catalog_rows": 81,
+  "pool_event_rows": 3956,
+  "pool_state_rows": 521389,
+  "arb_label_rows": 259077,
+  "size_sensitivity_rows": 7,
+  "opportunity_window_rows": 123,
+  "max_net_edge_bps_floor": 186659.28392235524,
+  "positive_network_floor_seconds": 85069,
+  "positive_network_p95_seconds": 40711,
+  "limitations": [
+    "Orca SOL/USDC pools are Whirlpool/Splash-style CLMM pools and are not reconstructed here.",
+    "Raydium Standard SOL/USDC pools include OpenBook inventory and are excluded from reserve-only reconstruction.",
+    "Meteora DAMM v1 SOL/USDC pools reuse shared Dynamic Vault pairs, so direct vault-balance history is not per-pool state.",
+    "Meteora DAMM v2 full-range SOL/USDC uses a dynamic fee toggle; arbitrage labels therefore use the current base fee as a lower-bound pool fee.",
+    "Network-fee outputs are shown as lower-bound and p95 fee bands derived from observed pool-touching transaction fees, not a claimed exact arbitrage transaction cost."
+  ],
+  "qc_report": {
+    "duplicate_events": 0,
+    "non_positive_reserves": 0,
+    "pool_state_nulls": 0,
+    "arb_label_nulls": 0,
+    "passed": true
+  }
 }

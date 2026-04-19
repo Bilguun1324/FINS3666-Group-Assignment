@@ -1,17 +1,89 @@
 {
-  "aggregate": 1,
-  "api_base": "https://api.geckoterminal.com/api/v2",
-  "created_at_utc": "2026-04-15T07:38:30.479829+00:00",
-  "limit": 720,
-  "market_edge_rows": 720,
+  "status": "supported",
   "market_slug": "optimism_wbtc_weth",
-  "network": "optimism",
-  "pool_ohlcv_rows": 2160,
-  "rebuilt_at_utc": "2026-04-15T07:48:30.184772+00:00",
-  "rebuilt_with_min_pool_ohlcv_rows": 24,
-  "search_query": "WBTC WETH",
-  "selected_pool_count": 3,
-  "source": "GeckoTerminal Public API",
-  "target_asset": "WBTC",
-  "timeframe": "hour"
+  "chain_key": "optimism",
+  "chain_name": "Optimism",
+  "pair_label": "WBTC/WETH",
+  "base_token": {
+    "symbol": "WBTC",
+    "address": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+    "decimals": 8
+  },
+  "quote_token": {
+    "symbol": "WETH",
+    "address": "0x4200000000000000000000000000000000000006",
+    "decimals": 18
+  },
+  "gas_token": {
+    "symbol": "WETH",
+    "address": "0x4200000000000000000000000000000000000006",
+    "decimals": 18
+  },
+  "sample_window_days": 7,
+  "state_frequency": "1s",
+  "gas_units": 220000,
+  "priority_fee_gwei": 0.0,
+  "notes": [
+    "This notebook switches from the earlier v3/hourly screen to two reserve-based pools that emit reconstructable Sync/Swap events.",
+    "Velodrome V2 uses a Solidly-style event layout; the decoder handles that explicitly."
+  ],
+  "blockers": [],
+  "generated_at_utc": "2026-04-18T02:25:56.402564+00:00",
+  "window_start_utc": "2026-04-11T02:25:14.204874+00:00",
+  "window_end_utc": "2026-04-18T02:25:14.204874+00:00",
+  "start_block": 150137769,
+  "end_block": 150440168,
+  "rpc_env_var": "OPTIMISM_RPC_URL",
+  "rpc_source": "public_rpc_fallback",
+  "pair_metadata": [
+    {
+      "role": "arb_pair",
+      "dex": "uniswap_v2_optimism",
+      "pair_address": "0x8782edc55c8514bf30e36a3585afcadbff525c77",
+      "factory_address": "0x0c3c1c532f1e39edf36be9fe0be1410313e074bf",
+      "event_style": "uniswap_v2",
+      "token0": "0x4200000000000000000000000000000000000006",
+      "token1": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+      "base_symbol": "WBTC",
+      "base_token_address": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+      "base_token_decimals": 8,
+      "quote_symbol": "WETH",
+      "quote_token_address": "0x4200000000000000000000000000000000000006",
+      "quote_token_decimals": 18,
+      "base_is_token0": false,
+      "fee_bps": 30.0,
+      "fee_rate": 0.003
+    },
+    {
+      "role": "arb_pair",
+      "dex": "velodrome_v2",
+      "pair_address": "0x17547215d96696de1e1c8a9791d6da18f92045af",
+      "factory_address": "0xf1046053aa5682b4f9a81b5481394da16be5ff5a",
+      "event_style": "solidly_v2",
+      "token0": "0x4200000000000000000000000000000000000006",
+      "token1": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+      "base_symbol": "WBTC",
+      "base_token_address": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+      "base_token_decimals": 8,
+      "quote_symbol": "WETH",
+      "quote_token_address": "0x4200000000000000000000000000000000000006",
+      "quote_token_decimals": 18,
+      "base_is_token0": false,
+      "fee_bps": 30.0,
+      "fee_rate": 0.003
+    }
+  ],
+  "rows": {
+    "event_logs": 88,
+    "events_curated": 88,
+    "swaps_raw": 43,
+    "pool_state_1s": 1173982,
+    "gas_reference_state_1s": 0,
+    "arb_labels_1s": 0
+  },
+  "primary_trade_size_base": 0.01,
+  "size_sensitivity_rows": 7,
+  "positive_seconds": 0,
+  "max_net_edge_bps": null,
+  "qc_passed": true
 }
