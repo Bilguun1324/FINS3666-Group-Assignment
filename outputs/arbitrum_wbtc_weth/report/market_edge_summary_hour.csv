@@ -1,0 +1,17 @@
+field,value
+timestamp_start_utc,2026-03-16T08:00:00+00:00
+timestamp_end_utc,2026-04-15T07:00:00+00:00
+market_edge_rows,720
+selected_pool_count,3
+selected_pools_with_explicit_fee,2
+selected_pools_with_unknown_fee,1
+fee_known_intervals,720
+fee_known_interval_share_pct,100.0
+observed_close_positive_intervals,720
+fee_adjusted_close_positive_intervals,250
+conservative_fee_adjusted_positive_intervals,0
+mean_observed_spread_bps,6.048842207631559
+mean_fee_adjusted_spread_bps,0.04884220763155878
+mean_conservative_fee_adjusted_spread_bps,-94.61221044358109
+median_min_pool_volume_usd,226826.42928065546
+min_current_pool_reserve_usd,737680.0564

@@ -1,0 +1,17 @@
+{
+  "schema_errors": {
+    "swaps_raw": [],
+    "pool_state_1s": [],
+    "arb_labels_1s": []
+  },
+  "duplicate_swap_events": 0,
+  "monotonic_timestamp_violations": 0,
+  "non_positive_reserves": 0,
+  "pool_state_gaps_1s": {
+    "equilibre_atom_axlusdc": 0,
+    "equilibre_atom_usdt": 0,
+    "equilibre_usdt_axlusdc": 0
+  },
+  "stale_state_nulls": 0,
+  "passed": true
+}

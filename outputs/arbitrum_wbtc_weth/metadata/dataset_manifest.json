@@ -1,17 +1,89 @@
 {
-  "aggregate": 1,
-  "api_base": "https://api.geckoterminal.com/api/v2",
-  "created_at_utc": "2026-04-15T07:38:11.198799+00:00",
-  "limit": 720,
-  "market_edge_rows": 720,
+  "status": "supported",
   "market_slug": "arbitrum_wbtc_weth",
-  "network": "arbitrum",
-  "pool_ohlcv_rows": 2160,
-  "rebuilt_at_utc": "2026-04-15T07:48:30.071352+00:00",
-  "rebuilt_with_min_pool_ohlcv_rows": 24,
-  "search_query": "WBTC WETH",
-  "selected_pool_count": 3,
-  "source": "GeckoTerminal Public API",
-  "target_asset": "WBTC",
-  "timeframe": "hour"
+  "chain_key": "arbitrum",
+  "chain_name": "Arbitrum",
+  "pair_label": "WBTC/WETH",
+  "base_token": {
+    "symbol": "WBTC",
+    "address": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+    "decimals": 8
+  },
+  "quote_token": {
+    "symbol": "WETH",
+    "address": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+    "decimals": 18
+  },
+  "gas_token": {
+    "symbol": "WETH",
+    "address": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+    "decimals": 18
+  },
+  "sample_window_days": 7,
+  "state_frequency": "1s",
+  "gas_units": 220000,
+  "priority_fee_gwei": 0.0,
+  "notes": [
+    "This is a real second-level reserve reconstruction on two Arbitrum constant-product pools.",
+    "Gas uses on-chain block base fee only with a fixed gas-units proxy and no synthetic price interpolation."
+  ],
+  "blockers": [],
+  "generated_at_utc": "2026-04-18T02:24:46.907472+00:00",
+  "window_start_utc": "2026-04-11T02:22:57.579898+00:00",
+  "window_end_utc": "2026-04-18T02:22:57.579898+00:00",
+  "start_block": 451225544,
+  "end_block": 453638725,
+  "rpc_env_var": "ARBITRUM_RPC_URL",
+  "rpc_source": "public_rpc_fallback",
+  "pair_metadata": [
+    {
+      "role": "arb_pair",
+      "dex": "sushiswap_arbitrum",
+      "pair_address": "0x515e252b2b5c22b4b2b6df66c2ebeea871aa4d69",
+      "factory_address": "0xc35dadb65012ec5796536bd9864ed8773abc74c4",
+      "event_style": "uniswap_v2",
+      "token0": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+      "token1": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+      "base_symbol": "WBTC",
+      "base_token_address": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+      "base_token_decimals": 8,
+      "quote_symbol": "WETH",
+      "quote_token_address": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+      "quote_token_decimals": 18,
+      "base_is_token0": true,
+      "fee_bps": 30.0,
+      "fee_rate": 0.003
+    },
+    {
+      "role": "arb_pair",
+      "dex": "uniswap_v2_arbitrum",
+      "pair_address": "0x8c1d83a25ee2da1643a5d937562682b1ac6c856b",
+      "factory_address": "0xf1d7cc64fb4452f05c498126312ebe29f30fbcf9",
+      "event_style": "uniswap_v2",
+      "token0": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+      "token1": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+      "base_symbol": "WBTC",
+      "base_token_address": "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
+      "base_token_decimals": 8,
+      "quote_symbol": "WETH",
+      "quote_token_address": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+      "quote_token_decimals": 18,
+      "base_is_token0": true,
+      "fee_bps": 30.0,
+      "fee_rate": 0.003
+    }
+  ],
+  "rows": {
+    "event_logs": 387,
+    "events_curated": 387,
+    "swaps_raw": 191,
+    "pool_state_1s": 1203521,
+    "gas_reference_state_1s": 0,
+    "arb_labels_1s": 599867
+  },
+  "primary_trade_size_base": 0.01,
+  "size_sensitivity_rows": 7,
+  "positive_seconds": 0,
+  "max_net_edge_bps": -2817.3440336193717,
+  "qc_passed": true
 }
