@@ -10,12 +10,12 @@
     "abs_spread_sq",
     "base_fee_gwei"
   ],
-  "intercept": -139.4279151103298,
+  "intercept": -139.634087509798,
   "coefficients": {
-    "abs_spread_bps": 0.9386798011749653,
-    "abs_spread_sq": 0.0009617823228256072,
-    "base_fee_gwei": -1.932814721046911
+    "abs_spread_bps": 0.9227319732201182,
+    "abs_spread_sq": 0.004374105705591735,
+    "base_fee_gwei": -0.6954897593181492
   },
-  "train_rows": 76348,
+  "train_rows": 79615,
   "notes": "This model ranks candidate MEV minutes by predicted post-fee, post-gas edge. It is intentionally a regression model because the current dataset snapshot has an extremely sparse binary opportunity flag."
 }
