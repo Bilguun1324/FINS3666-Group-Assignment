@@ -1,0 +1,381 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>FINS3666 Assignment 3 Final Report</title>
+  <style>
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.55;
+  color: #111;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 56px 56px;
+}
+h1, h2, h3, h4 { line-height: 1.2; margin-top: 1.2em; }
+h1 { font-size: 28px; margin-top: 0; }
+h2 { font-size: 22px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+h3 { font-size: 18px; }
+p, li { font-size: 12px; }
+ul, ol { padding-left: 24px; }
+img { max-width: 100%; display: block; margin: 16px auto; break-inside: avoid; }
+table { border-collapse: collapse; width: 100%; font-size: 11px; margin: 16px 0; }
+th, td { border: 1px solid #bbb; padding: 6px 8px; vertical-align: top; }
+th { background: #f2f2f2; }
+blockquote {
+  border-left: 4px solid #ccc;
+  margin: 16px 0;
+  padding: 0 0 0 16px;
+  color: #444;
+}
+code { font-size: 0.95em; }
+@page { size: A4; margin: 16mm 14mm 16mm 14mm; }
+</style>
+</head>
+<body>
+<h1>FINS3666 Assignment 3 Final Report</h1>
+<h2>Progress Draft: Work Completed To Date</h2>
+<p>This report summarises the first half of our project. At this stage, the project is not presented as a completed trading strategy. Instead, it documents the research process, the evidence we gathered across multiple chains, pairs, and DEXs, and the conclusions we can support from the data collected so far.</p>
+<h2>1. Project Overview</h2>
+<p>Our project investigates <strong>MEV arbitrage</strong> in decentralised exchange (DEX) liquidity pools. The initial idea was to study whether temporary price differences between pools could be converted into profitable trades. In this setting, arbitrage means buying an asset from the cheaper pool and selling it into the more expensive pool before the price difference disappears.</p>
+<p>We selected this topic because it is more specialised than a standard directional trading strategy and is closely connected to market microstructure. In automated market makers (AMMs), prices are determined by pool reserves rather than by an exchange order book. As a result, prices in individual pools can temporarily diverge from each other and from the broader market. However, it is not correct to assume that pools should always be mispriced. In practice, arbitrageurs usually push pool prices back toward equilibrium quickly, so the relevant question is whether the remaining discrepancies are large enough to survive execution costs.</p>
+<h2>2. Strategy Logic</h2>
+<p>The strategy we tested was cross-pool arbitrage. The economic logic is simple:</p>
+<ol>
+<li>Identify two pools quoting the same trading pair.</li>
+<li>Buy the asset in the pool where it is relatively cheaper.</li>
+<li>Sell the asset in the pool where it is relatively more expensive.</li>
+<li>Keep the difference only if the total trading profit exceeds all execution costs.</li>
+</ol>
+<p>For this project, profitability depends on more than just observing a price gap. A visible gap is only the starting point. The trade remains attractive only if the gross spread is larger than:</p>
+<ul>
+<li><strong>Price impact (slippage):</strong> the trade changes the pool reserves and therefore worsens the execution price.</li>
+<li><strong>DEX trading fees:</strong> each swap pays a liquidity provider fee, so a round-trip arbitrage pays fees twice.</li>
+<li><strong>Gas or network fees:</strong> the transaction must still be profitable after the blockchain execution cost.</li>
+</ul>
+<p>Therefore, the true decision rule is:</p>
+<p><strong>Arbitrage is feasible only when the spread exceeds price impact, DEX fees, and gas/network fees.</strong></p>
+<h2>3. Research Process</h2>
+<h3>3.1 Initial WBTC/WETH Screen</h3>
+<p>We began with a <strong>30-day, 1-minute</strong> screen of the <strong>WBTC/WETH</strong> market. The purpose of this first pass was simple: before building a more detailed execution dataset, we wanted to see whether the pair showed any clear arbitrage signal at a broader time horizon.</p>
+<p>This initial screen did <strong>not</strong> show an actionable net-profitable arbitrage strategy. In other words, at the coarse screening level, WBTC/WETH did not present a convincing opportunity that justified immediate trading.</p>
+<p>Because of that result, we changed the research design rather than stopping the project. The chronology of the first half was:</p>
+<ol>
+<li>Start with <strong>WBTC/WETH over 30 days at 1-minute frequency</strong>.</li>
+<li>Find <strong>no convincing actionable arbitrage</strong> at that level.</li>
+<li>Increase the time resolution to <strong>the last 7 days at 1-second frequency</strong>.</li>
+<li>Observe many more short-lived price differences, but find that these differences still failed to overcome DEX fees and gas costs in a robust way.</li>
+<li>Try <strong>different exchanges and different pairs</strong> to test whether the failure was specific to WBTC/WETH or part of a broader pattern.</li>
+<li>Still fail to find a <strong>robust net-profitable arbitrage strategy</strong>.</li>
+</ol>
+<p>The exact venue set also changed between stages because only some pools exposed the reserve-event structure needed for reliable historical execution modelling. The broader 30-day screen is reflected in the saved hourly reporting summaries, while the later 7-day analysis is the deeper second-level execution test.</p>
+<h3>3.2 Higher-Frequency WBTC/WETH Follow-Up</h3>
+<p>The next step was a <strong>7-day, 1-second</strong> reserve-based analysis of <strong>WBTC/WETH on Optimism</strong>. This stage was designed to model arbitrage more realistically. Instead of only comparing quoted prices, we reconstructed pool states from on-chain events and simulated whether a hypothetical trade could actually be executed profitably after accounting for price impact, pool fees, and gas assumptions.</p>
+<p>This higher-frequency stage is the core result for the Ethereum-style leg of the project, because it tests executable profitability rather than simply identifying a quoted price difference. It also explains why the narrative changed between the first and second screens: moving from 1-minute data to 1-second data revealed many more temporary price differences, but those extra differences still did not translate into a robust net-profitable strategy once execution costs were included.</p>
+<p>The saved WBTC size-sensitivity output shows this very clearly:</p>
+<ul>
+<li>at <strong>0.0001 WBTC</strong>, the dataset still recorded <strong>113,713 gross-positive seconds</strong>,</li>
+<li>at <strong>0.0100 WBTC</strong>, that fell to <strong>8,640 gross-positive seconds</strong>,</li>
+<li>by <strong>0.0200 WBTC</strong>, even <strong>gross-positive seconds fell to zero</strong>,</li>
+<li>and <strong>net-positive seconds remained zero at every tested WBTC size</strong>.</li>
+</ul>
+<p>The gross edge measures tell the same story. As WBTC trade size increased, the average executable edge deteriorated quickly:</p>
+<ul>
+<li>the <strong>mean gross executable edge</strong> was still positive at very small sizes,</li>
+<li>it turned negative by <strong>0.0050 WBTC</strong>,</li>
+<li>and it became strongly negative at larger sizes.</li>
+</ul>
+<p>This means the strategy looked most promising only at very small trades, but even there it still failed after full trading costs.</p>
+<p><img alt="Figure 2: Positive seconds by WBTC size" src="figures/positive_seconds_by_wbtc_size.png" /></p>
+<p><strong>Figure 2.</strong> Positive seconds by WBTC size. The chart shows that gross-positive seconds were common only at very small trade sizes, while net-positive seconds remained zero throughout.</p>
+<p><img alt="Figure 3: Gross executable edge by WBTC size" src="figures/gross_executable_edge_by_wbtc_size.png" /></p>
+<p><strong>Figure 3.</strong> Gross executable edge by WBTC size. The average executable edge declines as trade size increases and turns negative once the simulated trade becomes too large relative to available pool depth.</p>
+<h3>3.3 Tried Different Exchanges And Different Pairs</h3>
+<p>After the WBTC/WETH screens did not produce a viable strategy, we broadened the search. This step was important because it tested whether the weak profitability was only a WBTC/WETH issue or whether the same problem appeared across other exchange combinations and other pairs.</p>
+<p>The key screened combinations were:</p>
+<table>
+<thead>
+<tr>
+<th>Market</th>
+<th>Chain</th>
+<th>Pair or Route</th>
+<th>Main Venues / Pools Tested</th>
+<th>Main Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Arbitrum WBTC/WETH</td>
+<td>Arbitrum</td>
+<td>WBTC/WETH</td>
+<td>SushiSwap v2, Uniswap v2</td>
+<td>Raw spreads appeared often, but deeper 1-second execution modelling still found no net-profitable seconds.</td>
+</tr>
+<tr>
+<td>Optimism WBTC/WETH</td>
+<td>Optimism</td>
+<td>WBTC/WETH</td>
+<td>Uniswap v2, Velodrome v2</td>
+<td>Raw spreads survived some fee adjustment in the hourly screen, but the later 1-second execution test still found zero profitable seconds.</td>
+</tr>
+<tr>
+<td>Base WBTC/WETH</td>
+<td>Base</td>
+<td>WBTC/WETH</td>
+<td>Aerodrome candidate market, Uniswap v3 reference market</td>
+<td>Not carried forward as an honest reserve-based backtest because two comparable reconstructable venues were not available.</td>
+</tr>
+<tr>
+<td>Ethereum Mainnet USDC/USDT</td>
+<td>Ethereum Mainnet</td>
+<td>USDC/USDT</td>
+<td>Uniswap v2, SushiSwap v2</td>
+<td>Quote differences existed, but no positive hourly intervals remained after fee adjustment in the saved screen.</td>
+</tr>
+<tr>
+<td>Ethereum Mainnet DAI/USDC</td>
+<td>Ethereum Mainnet</td>
+<td>DAI/USDC</td>
+<td>Uniswap v2, SushiSwap v2</td>
+<td>This was the strongest mainnet hourly screen, but the advantage shrank sharply after stricter cost assumptions and disappeared at larger sizes.</td>
+</tr>
+<tr>
+<td>Ethereum Mainnet WETH/USDC</td>
+<td>Ethereum Mainnet</td>
+<td>WETH/USDC</td>
+<td>Uniswap v2, SushiSwap v2</td>
+<td>Raw spreads were common, but no positive hourly intervals remained after fee adjustment in the saved screen.</td>
+</tr>
+<tr>
+<td>Ethereum Mainnet WBTC/USDC</td>
+<td>Ethereum Mainnet</td>
+<td>WBTC/USDC</td>
+<td>Uniswap v2, PancakeSwap v2</td>
+<td>Only a very small number of fee-adjusted positives appeared, and none survived the conservative fee-and-gas treatment.</td>
+</tr>
+<tr>
+<td>Cosmos proxy route</td>
+<td>Kava EVM / Cosmos proxy</td>
+<td>ATOM/USDt/axlUSDC triangle</td>
+<td>Equilibre ATOM/axlUSDC, Equilibre ATOM/USDt, Equilibre USDt/axlUSDC</td>
+<td>Produced two small positive windows in the route-based second-level screen, but profits were only a few cents.</td>
+</tr>
+<tr>
+<td>Solana extension</td>
+<td>Solana</td>
+<td>SOL/USDC</td>
+<td>Raydium CPMM, Meteora DAMM v2</td>
+<td>Produced many candidate windows under lower-bound assumptions, but the pools were too small and the fee treatment too limited for a strong conclusion.</td>
+</tr>
+</tbody>
+</table>
+<p>This broader search matters because it shows that the project did not stop after one unsuccessful attempt. Instead, we tested multiple DEX combinations and several nearby pairs before concluding that the main obstacle was not simply the choice of one exchange or one market.</p>
+<p><img alt="Figure 4: Hourly screening comparison" src="figures/screening_comparison_hourly.png" /></p>
+<p><strong>Figure 4.</strong> Cross-market comparison of the hourly screening stage at the smallest saved notional. The main message is that raw spread counts are much easier to find than opportunities that remain positive after stricter execution costs.</p>
+<h3>3.4 Exploratory Solana Extension</h3>
+<p>After the Optimism results remained unconvincing, we explored whether a lower-fee ecosystem could improve the economics. For this reason, we extended the project to <strong>Solana</strong>, using an exploratory <strong>SOL/USDC</strong> setup. This was not a perfect like-for-like continuation of the WBTC/WETH analysis, but it served as a practical test of whether lower network costs could make arbitrage more viable.</p>
+<p>This Solana stage should be treated as exploratory only. The reconstructed pools were small, the fee treatment was partly based on lower-bound assumptions, and the outputs should not yet be interpreted as proof of a scalable strategy.</p>
+<p><img alt="Figure 5: Solana fee sensitivity" src="figures/solana_fee_sensitivity.png" /></p>
+<p><strong>Figure 5.</strong> Exploratory Solana fee sensitivity. Candidate opportunities were much more common than in the WBTC/WETH tests, but the result depended heavily on fee assumptions.</p>
+<p><img alt="Figure 6: Solana window durations" src="figures/solana_window_durations.png" /></p>
+<p><strong>Figure 6.</strong> Duration of the longest candidate Solana windows. Persistent windows did exist, but the underlying pools were too small for this to count as strong evidence of a practical strategy.</p>
+<h2>4. Data, Preprocessing, And Method</h2>
+<p>The project reconstructs historical pool states from on-chain event data. For each selected pool, we track reserve changes through time, align the reserves to a regular frequency, derive the implied AMM price, and then simulate a hypothetical arbitrage trade between venues.</p>
+<p>This methodology matters because simply comparing displayed prices is not enough. In an AMM, the execution price depends on trade size. A quoted gap may disappear once the trade actually moves the pool. For that reason, the project required a full preprocessing and data-engineering pipeline rather than a simple price-comparison script.</p>
+<h3>4.1 Raw Data Collection</h3>
+<p>The first stage of the pipeline collects or loads the raw blockchain inputs needed to reconstruct pool state honestly. Depending on the market, the notebooks either load previously saved files or query the relevant chain RPC directly.</p>
+<p>The raw inputs include:</p>
+<ul>
+<li><code>Swap</code> events</li>
+<li><code>Sync</code> events</li>
+<li><code>Mint</code> events</li>
+<li><code>Burn</code> events</li>
+<li>block headers for timestamps and fee information</li>
+<li>pool metadata such as token addresses, token decimals, and fee settings</li>
+</ul>
+<p>These raw inputs are stored in the <code>data/&lt;market&gt;/raw/</code> directories. The main raw artifacts include:</p>
+<ul>
+<li><code>event_logs.parquet</code></li>
+<li><code>block_headers.parquet</code></li>
+<li><code>pair_metadata.parquet</code></li>
+</ul>
+<p>This stage is important because the project does not rely on a displayed market price from a website or API. Instead, it starts from on-chain pool events and rebuilds the market state from the raw source data.</p>
+<h3>4.2 Preprocessing And Data Processing Pipeline</h3>
+<p>After raw collection, the data passes through several preprocessing steps before it can be used for arbitrage analysis.</p>
+<p><img alt="Figure 7: Preprocessing pipeline" src="figures/preprocessing_pipeline.png" /></p>
+<p><strong>Figure 7.</strong> Preprocessing and data-processing pipeline. The project transforms raw on-chain event logs into second-level pool states, then into arbitrage labels and final report outputs.</p>
+<p>The main processing steps are:</p>
+<ol>
+<li><strong>Decode event payloads:</strong> convert raw log data into readable event tables.</li>
+<li><strong>Scale token amounts:</strong> convert integer blockchain units into real <code>WBTC</code>, <code>WETH</code>, <code>USDC</code>, and other token quantities using token decimals.</li>
+<li><strong>Reconstruct reserves:</strong> rebuild pool reserves over time from the event sequence.</li>
+<li><strong>Resample to regular frequency:</strong> align the data to a fixed time grid, especially the <code>1-second</code> grid used in the second-level backtests.</li>
+<li><strong>Forward-fill state between updates:</strong> carry forward the most recent reserve state until the next on-chain reserve update.</li>
+<li><strong>Create derived fields:</strong> compute mid-prices, swap counts, trading volume, liquidity snapshots, and gas conversion fields.</li>
+<li><strong>Construct arbitrage labels:</strong> simulate hypothetical trades across venues and calculate gross edge, fees, gas, and final net profitability.</li>
+<li><strong>Group positive runs into windows:</strong> convert consecutive positive seconds into opportunity windows so that one persistent state is not misread as many independent trades.</li>
+</ol>
+<p>The key curated outputs generated by this pipeline include:</p>
+<table>
+<thead>
+<tr>
+<th>Data Layer</th>
+<th>Purpose</th>
+<th>Typical Output Files</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Raw inputs</td>
+<td>Store original chain data and metadata</td>
+<td><code>event_logs.parquet</code>, <code>block_headers.parquet</code>, <code>pair_metadata.parquet</code></td>
+</tr>
+<tr>
+<td>Curated event tables</td>
+<td>Human-readable decoded events and swap records</td>
+<td><code>events_curated.parquet</code>, <code>swaps_raw.parquet</code></td>
+</tr>
+<tr>
+<td>Pool-state dataset</td>
+<td>Reserve history and derived pool fields on the time grid</td>
+<td><code>pool_state_1s.parquet</code>, <code>gas_reference_state_1s.parquet</code></td>
+</tr>
+<tr>
+<td>Arbitrage labels</td>
+<td>Executable trade simulation outputs</td>
+<td><code>arb_labels_1s.parquet</code></td>
+</tr>
+<tr>
+<td>Reporting outputs</td>
+<td>Summary tables, opportunity windows, and size-sensitivity results</td>
+<td><code>opportunity_size_sensitivity_1s.csv</code>, <code>opportunity_windows_1s.csv</code>, report figures</td>
+</tr>
+</tbody>
+</table>
+<p>This preprocessing pipeline is central to the project. Without reserve reconstruction and time alignment, it would not be possible to simulate an executable trade correctly.</p>
+<h3>4.3 Why The Second-Level Dataset Matters</h3>
+<p>The second-level dataset is the most important processed dataset in the project. It is built by carrying forward the latest valid reserve state between actual on-chain pool updates. That means one reserve state can persist across many seconds.</p>
+<p>This design has two implications:</p>
+<ul>
+<li>a temporary price gap can last across many consecutive timestamps without representing many independent trades,</li>
+<li>and a candidate opportunity must be evaluated using the current reserves, not just the most recent quoted price.</li>
+</ul>
+<p>This is why the report uses both:</p>
+<ul>
+<li><strong>positive seconds</strong>, which show how often a state appears attractive at a given moment, and</li>
+<li><strong>opportunity windows</strong>, which show whether those seconds belong to one continuous market condition.</li>
+</ul>
+<h3>4.4 Execution Simulation And Reporting Outputs</h3>
+<p>Once the processed pool-state dataset exists, the notebooks simulate hypothetical arbitrage trades across the selected venues. For each timestamp and trade size, the project calculates:</p>
+<ul>
+<li>gross executable edge</li>
+<li>DEX fee cost</li>
+<li>gas or network cost</li>
+<li>net edge</li>
+<li>positive or non-positive opportunity flags</li>
+</ul>
+<p>Those outputs are then summarized into the final report tables and figures. The most important reporting artifacts for interpretation are:</p>
+<ul>
+<li>size-sensitivity tables by trade size</li>
+<li>positive-second counts</li>
+<li>opportunity-window summaries</li>
+<li>hourly screening summaries across different markets</li>
+</ul>
+<p>In practice, this workflow was used at two different levels:</p>
+<ul>
+<li>a <strong>broader hourly screening stage</strong> across several markets and DEX combinations, and</li>
+<li>a <strong>deeper second-level execution stage</strong> for the markets that looked most worth investigating further.</li>
+</ul>
+<h2>5. Findings So Far</h2>
+<h3>5.1 Market Sweep Across Pairs And Exchanges</h3>
+<p>The broad screening stage already showed an important pattern: many pairs looked interesting at the raw quote level, but only a small minority remained attractive after costs, and almost none survived a stricter fee-and-gas treatment.</p>
+<p>At the <strong>USD 1,000 hourly screening notional</strong>, the saved outputs show:</p>
+<ul>
+<li><strong>Arbitrum WBTC/WETH (SushiSwap v2 vs Uniswap v2):</strong> 99.86% of intervals looked positive before costs, 34.58% remained positive after explicit fees, and 0% survived the conservative fee-and-gas treatment.</li>
+<li><strong>Optimism WBTC/WETH (Uniswap v2 vs Velodrome v2):</strong> 25.14% of intervals looked positive before costs, 8.47% remained positive after explicit fees, and 0% survived the conservative treatment.</li>
+<li><strong>Ethereum Mainnet DAI/USDC (Uniswap v2 vs SushiSwap v2):</strong> 29.44% of intervals looked positive before costs, 27.50% remained positive after explicit fees, and only 2.50% remained positive after the conservative treatment.</li>
+<li><strong>Ethereum Mainnet USDC/USDT (Uniswap v2 vs SushiSwap v2):</strong> 15.42% of intervals looked positive before costs, but 0% remained positive after fee adjustment.</li>
+<li><strong>Ethereum Mainnet WETH/USDC (Uniswap v2 vs SushiSwap v2):</strong> 95.97% of intervals looked positive before costs, but 0% remained positive after fee adjustment.</li>
+<li><strong>Ethereum Mainnet WBTC/USDC (Uniswap v2 vs PancakeSwap v2):</strong> 75.00% of intervals looked positive before costs, only 0.42% remained positive after explicit fees, and 0% survived the conservative treatment.</li>
+</ul>
+<p>The broader search therefore did not support a simple conclusion that “arbitrage was everywhere.” Instead, it showed that different market structures reacted differently to costs:</p>
+<ul>
+<li>stablecoin pairs could retain more of the quote-level spread after explicit pool fees,</li>
+<li>BTC and ETH pairs often looked attractive before costs,</li>
+<li>but once gas and stricter execution assumptions were applied, the practical edge usually disappeared.</li>
+</ul>
+<p>The two extensions outside the main same-pair setup also need to be interpreted carefully:</p>
+<ul>
+<li>The <strong>Kava/Cosmos proxy ATOM route</strong> produced only <strong>2 positive windows</strong> across the saved second-level run, with maximum profit still below <strong>USD 0.05</strong>.</li>
+<li>The <strong>Solana SOL/USDC extension</strong> produced many more candidate windows, but under lower-bound assumptions and in very small pools, so it cannot yet be treated as a robust trading result.</li>
+</ul>
+<h3>5.2 Optimism WBTC/WETH: Apparent Spreads Did Not Survive Realistic Costs</h3>
+<p>The Optimism results show the main weakness of the original idea. At a surface level, many intervals looked promising because one venue often quoted a better price than another. However, once costs were applied, the opportunity disappeared.</p>
+<p>From the saved hourly sensitivity outputs:</p>
+<ul>
+<li>The initial <strong>30-day, 1-minute WBTC/WETH screen</strong> is summarised in the saved report outputs as <strong>720 hourly intervals</strong>.</li>
+<li>At the raw observed-spread level, many intervals looked positive.</li>
+<li>After applying explicit DEX fees, the best case was only <strong>61 positive intervals out of 720</strong> at the smallest tested notional of <strong>USD 1,000</strong>, which is <strong>8.47%</strong> of intervals.</li>
+<li>After applying the more conservative fee-and-gas treatment, <strong>no tested trade size remained positive</strong>.</li>
+</ul>
+<p>This result is even stronger in the higher-frequency execution dataset:</p>
+<ul>
+<li>The <strong>7-day, 1-second Optimism WBTC/WETH run recorded 0 positive seconds</strong>.</li>
+<li>It also recorded <strong>0 positive opportunity windows</strong>.</li>
+<li>This means the saved execution test did not find a single net-profitable arbitrage trade in that sample once costs were modelled, even though moving to second-level data exposed many more short-lived price differences.</li>
+</ul>
+<p>The main lesson is that quoted inefficiency does not imply executable profit. Price impact can be reduced by trading smaller size, but DEX fees and gas costs do not disappear in the same way. In our results, those fixed trading costs were large enough to eliminate profitability.</p>
+<h3>5.3 Why Smaller Trades Did Not Solve The Problem</h3>
+<p>One possible response to the slippage problem is to trade smaller size. This does help with price impact because a small trade moves pool reserves less aggressively. However, our results show that reducing size does not solve the entire problem:</p>
+<ul>
+<li>smaller size reduces slippage,</li>
+<li>but it also reduces the gross dollar profit from the spread,</li>
+<li>while DEX fees and gas still remain material.</li>
+</ul>
+<p>As a result, a trade can look attractive before costs, survive slippage, and still fail after fees and network costs are included. This is exactly what happened in our Ethereum-style analysis.</p>
+<h3>5.4 Solana Extension: Many Candidate Windows, But Weak Economic Quality</h3>
+<p>The exploratory Solana extension produced a very different pattern. In this case, the model did identify a large number of candidate positive seconds under lower-bound cost assumptions:</p>
+<ul>
+<li>The sample contained <strong>259,077 observed seconds</strong>.</li>
+<li><strong>85,069 seconds</strong> remained positive after the pool-fee floor and lower-bound network-fee assumptions.</li>
+<li>This is approximately <strong>32.84%</strong> of the sample.</li>
+<li>These positive seconds formed <strong>123 opportunity windows</strong>.</li>
+<li>The average window length was about <strong>692 seconds</strong> or <strong>11.5 minutes</strong>.</li>
+<li>The longest window lasted <strong>4,206 seconds</strong>, or roughly <strong>70.1 minutes</strong>.</li>
+</ul>
+<p>At first glance, these results appear much more encouraging than the Optimism findings. However, the economic quality of these opportunities was still weak:</p>
+<ul>
+<li>the selected pools were extremely small,</li>
+<li>one reconstructed pool had only about <strong>USD 132</strong> in total value locked,</li>
+<li>another had only about <strong>USD 3,270</strong> in total value locked,</li>
+<li>the <strong>maximum floor-estimated profit per window was below USD 0.09</strong>,</li>
+<li>and some fee inputs were lower-bound approximations rather than exact full execution costs.</li>
+</ul>
+<p>This means the Solana results should not be described as a robust profitable strategy. They show that lower-fee environments can produce more candidate opportunities, but the specific opportunities found here were too small and too assumption-sensitive to support a strong trading conclusion.</p>
+<h2>6. Interpretation</h2>
+<p>The evidence so far supports a clear intermediate conclusion:</p>
+<p><strong>MEV-style cross-pool arbitrage is easy to identify at the quoted-price level, but much harder to justify once realistic execution costs are included.</strong></p>
+<p>This is the most important result from the first half of the assignment. Our original intuition was that AMM pools should frequently show exploitable mispricing because prices are determined mechanically from reserves. That intuition was only partly correct. Temporary discrepancies do appear, but in the markets we tested they were usually not large enough, clean enough, or deep enough to produce realistic net profit.</p>
+<p>The project therefore moved through a clear sequence: <strong>30-day 1-minute WBTC/WETH screen -&gt; no convincing arbitrage -&gt; 7-day 1-second WBTC/WETH screen -&gt; many temporary price differences -&gt; still not enough to beat DEX fees and gas -&gt; broader search across other pairs and exchanges -&gt; still no robust net-profitable strategy</strong>. That shift is important because it changes the conclusion from a superficial yes to a much more defensible no.</p>
+<h2>7. Current Conclusion</h2>
+<p>Based on the work completed so far, our current conclusion is:</p>
+<ul>
+<li>Across the <strong>hourly screens on multiple pairs and DEXs</strong>, many markets showed raw quote differences, but very few retained a convincing edge after realistic cost adjustments.</li>
+<li>The deeper <strong>Arbitrum and Optimism WBTC/WETH second-level tests</strong> did <strong>not</strong> produce executable net-profitable results in the saved runs.</li>
+<li>The strongest alternative hourly screen, <strong>Ethereum Mainnet DAI/USDC on Uniswap v2 and SushiSwap v2</strong>, still weakened materially once stricter costs and size effects were imposed.</li>
+<li>The <strong>Cosmos proxy and Solana extensions</strong> produced positive candidate windows, but these results remain too small, too fragile, or too assumption-sensitive to support a reliable trading claim.</li>
+</ul>
+<p>Therefore, the project has not yet produced a convincing live-tradable arbitrage strategy. However, it has produced a useful and defensible research result: <strong>apparent MEV arbitrage opportunities can disappear once we model realistic trading frictions properly.</strong></p>
+<h2>8. Next Steps For The Second Half</h2>
+<p>The next stage of the assignment should focus on improving the economic realism and comparability of the analysis. The most useful next steps are:</p>
+<ol>
+<li>Test more comparable lower-fee markets with larger and deeper pools.</li>
+<li>Improve fee modelling so that network and venue costs are estimated more precisely.</li>
+<li>Evaluate whether the best opportunities remain profitable at realistic executable size, not just at minimal notional size.</li>
+<li>Compare multiple chains using the same pair structure where possible.</li>
+<li>Distinguish between raw opportunity counts and economically meaningful profit after all costs.</li>
+</ol>
+<h2>9. Interim Takeaway</h2>
+<p>At this point, the strongest conclusion is not that we discovered a profitable MEV bot. The stronger conclusion is that <strong>execution realism matters more than raw opportunity counts</strong>. Once slippage, swap fees, and gas are included, many attractive-looking arbitrage trades disappear. That finding is central to the project and provides a clear foundation for the second half of the assignment.</p>
+</body>
+</html>
